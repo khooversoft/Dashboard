@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Dashboard.sql</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{214ed658-52cd-482b-b4ee-86d1c5d34d9f}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>Dashboard.sql</RootNamespace>
+    <AssemblyName>Dashboard.sql</AssemblyName>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Publish" />
+    <Folder Include="App\" />
+    <Folder Include="App\Stored Procedures" />
+    <Folder Include="App\Views" />
+    <Folder Include="AppDbo\" />
+    <Folder Include="AppDbo\Tables\" />
+    <Folder Include="Security\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Publish\SqlSchemaCompare1.scmp" />
+    <None Include="Publish\Dashboard.sql.publish.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="AppDbo\Tables\Provider.sql" />
+    <Build Include="AppDbo\Tables\Stage.sql" />
+    <Build Include="AppDbo\Tables\Engagement.sql" />
+    <Build Include="AppDbo\Tables\StageHistory.sql" />
+    <Build Include="Security\App.sql" />
+    <Build Include="Security\AppDbo.sql" />
+    <Build Include="App\Stored Procedures\Set-Provider.sql" />
+    <Build Include="App\Stored Procedures\Set-Stage.sql" />
+    <Build Include="App\Stored Procedures\Create-Engagement.sql" />
+    <Build Include="App\Stored Procedures\Delete-Engagement.sql" />
+    <Build Include="App\Stored Procedures\Delete-Provider.sql" />
+    <Build Include="App\Stored Procedures\Delete-Stage.sql" />
+    <Build Include="App\Stored Procedures\Set-Engagement.sql" />
+    <Build Include="App\Stored Procedures\Set-StageHistory.sql" />
+    <Build Include="App\Views\View-Engagement.sql" />
+    <Build Include="App\Views\View-Provider.sql" />
+    <Build Include="App\Views\View-Stage.sql" />
+    <Build Include="App\Views\View-StageHistory.sql" />
+  </ItemGroup>
+</Project>
