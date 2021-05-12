@@ -65,29 +65,27 @@
     <Folder Include="AppDbo\" />
     <Folder Include="AppDbo\Tables\" />
     <Folder Include="Security\" />
+    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Publish\SqlSchemaCompare1.scmp" />
     <None Include="Publish\Dashboard.sql.publish.xml" />
+    <None Include="Scripts\LoadTestData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="AppDbo\Tables\Provider.sql" />
     <Build Include="AppDbo\Tables\Stage.sql" />
-    <Build Include="AppDbo\Tables\Engagement.sql" />
     <Build Include="AppDbo\Tables\StageHistory.sql" />
     <Build Include="Security\App.sql" />
     <Build Include="Security\AppDbo.sql" />
     <Build Include="App\Stored Procedures\Set-Provider.sql" />
     <Build Include="App\Stored Procedures\Set-Stage.sql" />
-    <Build Include="App\Stored Procedures\Create-Engagement.sql" />
-    <Build Include="App\Stored Procedures\Delete-Engagement.sql" />
     <Build Include="App\Stored Procedures\Delete-Provider.sql" />
     <Build Include="App\Stored Procedures\Delete-Stage.sql" />
-    <Build Include="App\Stored Procedures\Set-Engagement.sql" />
     <Build Include="App\Stored Procedures\Set-StageHistory.sql" />
-    <Build Include="App\Views\View-Engagement.sql" />
     <Build Include="App\Views\View-Provider.sql" />
     <Build Include="App\Views\View-Stage.sql" />
     <Build Include="App\Views\View-StageHistory.sql" />
+    <Build Include="App\Stored Procedures\Delete-StageHistory.sql" />
   </ItemGroup>
 </Project>

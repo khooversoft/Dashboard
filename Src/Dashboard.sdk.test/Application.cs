@@ -37,9 +37,35 @@ namespace Dashboard.sdk.test
             });
         }
 
-        public static DashboardMgmtClient GetClient()
+        public static DashboardMgmtClient GetClient() => _client ?? new DashboardMgmtClient(GetConnectionString(), GetLoggerFactory().CreateLogger<DashboardMgmtClient>());
+
+        public static async Task ClearDatabase()
         {
-            return _client ?? new DashboardMgmtClient(GetConnectionString(), GetLoggerFactory().CreateLogger<DashboardMgmtClient>());
+            await ClearStageHistory();
+            await ClearProviders();
+            await ClearStages();
+        }
+
+        public static async Task ClearStageHistory()
+        {
+            DashboardMgmtClient client = GetClient();
+            var list = await client.StageHistory.List();
+            await list.ForEachAsync(async x => await client.StageHistory.Delete(x.Provider, x.Stage));
+        }
+
+        public static async Task ClearProviders()
+        {
+            DashboardMgmtClient client = GetClient();
+            var list = await client.Provider.List();
+            await list.ForEachAsync(async x => await client.Provider.Delete(x.Provider));
+        }
+
+        public static async Task ClearStages()
+        {
+            DashboardMgmtClient client = GetClient();
+
+            var list = await client.Stage.List();
+            await list.ForEachAsync(async x => await client.Stage.Delete(x.Stage));
         }
     }
 }

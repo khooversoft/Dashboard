@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [App].[Set-Stage]
-    @Stage nvarchar(50),
+    @Stage nvarchar(100),
     @OrderNumber int
 AS
 BEGIN

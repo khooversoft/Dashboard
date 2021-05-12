@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dashboard.sdk.Records;
 using Microsoft.Extensions.Logging;
 using Toolbox;
+using Toolbox.Sql;
 
 namespace Dashboard.sdk
 {
@@ -21,23 +22,30 @@ namespace Dashboard.sdk
             _logger = logger;
         }
 
-        public async Task<int> Set(int stageHistoryId, DateTime? startDate, DateTime? completedDate)
-        {
-            IReadOnlyList<ReturnId> returnId = await new SqlExec(_connectionString, _logger)
-                .SetCommand("[App].[Set-StageHistory]", CommandType.StoredProcedure)
-                .AddParameter(nameof(stageHistoryId), stageHistoryId)
-                .AddParameter(nameof(startDate), startDate)
-                .AddParameter(nameof(completedDate), completedDate)
-                .Execute<ReturnId>(ReturnId.Read);
+        public async Task Delete(string provider, string stage) => await new SqlExec(_connectionString, _logger)
+            .AddParameter(nameof(provider), provider)
+            .AddParameter(nameof(stage), stage)
+            .SetCommand("[App].[Delete-StageHistory]", CommandType.StoredProcedure)
+            .ExecuteNonQuery();
 
-            return returnId.First().Id;
-        }
-
-        public async Task<IReadOnlyList<ProviderRecord>> List()
+        public async Task<IReadOnlyList<StageHistoryRecord>> List(string? provider = null, string? stage = null)
         {
+            string cmd = new SqlViewBuilder("[App].[View-StageHistory]")
+                .Restrict("[Provider]", provider)
+                .Restrict("[Stage]", stage)
+                .Build();
+
             return await new SqlExec(_connectionString, _logger)
-                .SetCommand("SELECT * FROM [App].[View-StageHistory]", CommandType.Text)
-                .Execute(ProviderRecord.Read);
+                .SetCommand(cmd, CommandType.Text)
+                .Execute(StageHistoryRecord.Read);
         }
+
+        public async Task Set(string provider, string stage, DateTime? startDate, DateTime? completedDate) => await new SqlExec(_connectionString, _logger)
+            .SetCommand("[App].[Set-StageHistory]", CommandType.StoredProcedure)
+            .AddParameter(nameof(provider), provider)
+            .AddParameter(nameof(stage), stage)
+            .AddParameter(nameof(startDate), startDate?.Date, true)
+            .AddParameter(nameof(completedDate), completedDate?.Date, true)
+            .ExecuteNonQuery();
     }
 }

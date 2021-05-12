@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Toolbox.Sql.Extensions;
 
@@ -12,9 +8,13 @@ namespace Dashboard.sdk.Records
     {
         public int StageHistoryId { get; init; }
 
-        public int EngagementId { get; init; }
+        public int ProviderId { get; init; }
+
+        public string Provider { get; init; } = null!;
 
         public int StageId { get; init; }
+
+        public string Stage { get; init; } = null!;
 
         public DateTime? StartDate { get; init; }
 
@@ -25,8 +25,10 @@ namespace Dashboard.sdk.Records
             return new StageHistoryRecord
             {
                 StageHistoryId = reader.Get<int>(nameof(StageHistoryId)),
-                EngagementId = reader.Get<int>(nameof(EngagementId)),
+                ProviderId = reader.Get<int>(nameof(ProviderId)),
+                Provider = reader.Get<string>(nameof(Provider)),
                 StageId = reader.Get<int>(nameof(StageId)),
+                Stage = reader.Get<string>(nameof(Stage)),
                 StartDate = reader.Get<DateTime?>(nameof(StartDate)),
                 CompletedDate = reader.Get<DateTime?>(nameof(CompletedDate)),
             };

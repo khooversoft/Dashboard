@@ -1,0 +1,26 @@
+﻿@page "/current"
+
+@using DashboardMgnt.Client.Application.Menu;
+
+<PageMenu MenuCollection="@MenuCollection" />
+
+<h3>CurrentEngagments</h3>
+
+@code {
+    public MenuCollection MenuCollection { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        MenuCollection = new MenuCollection()
+        {
+            //new MenuItem("Overview", $"model/{ModelName}", "oi-list-rich", !IsOverview),
+            //new MenuItem("Try It", $"model/{ModelName}/tryit", "oi-aperture", !IsTryIt),
+            //new MenuItem("Details", $"model/{ModelName}/details", "oi-list", !IsDetails),
+            //new MenuDivider(),
+            //new MenuButton("Swagger", async () => await ShowSwagger(), "oi-code", true),
+            //new MenuItem("Logs", $"model/{ModelName}/logs", "oi-excerpt", !IsModelLogs),
+        };
+
+        base.OnParametersSet();
+    }
+}

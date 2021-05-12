@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Dashboard.sdk.test
 {
+    [Collection("Database_Tests")]
     public class StageTests
     {
         [Fact]
@@ -25,6 +26,15 @@ namespace Dashboard.sdk.test
             int id = await client.Stage.Set(stageName, 10);
 
             providers = await client.Stage.List();
+            providers.Count.Should().Be(1);
+            providers.First().Action(x =>
+            {
+                x.StageId.Should().Be(id);
+                x.Stage.Should().Be(stageName);
+                x.OrderNumber.Should().Be(10);
+            });
+
+            providers = await client.Stage.List(stageName);
             providers.Count.Should().Be(1);
             providers.First().Action(x =>
             {

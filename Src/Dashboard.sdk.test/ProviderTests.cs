@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Dashboard.sdk.test
 {
+    [Collection("Database_Tests")]
     public class ProviderTests
     {
         [Fact]
@@ -25,6 +26,15 @@ namespace Dashboard.sdk.test
             int id = await client.Provider.Set(providerName, true);
 
             providers = await client.Provider.List();
+            providers.Count.Should().Be(1);
+            providers.First().Action(x =>
+            {
+                x.ProviderId.Should().Be(id);
+                x.Provider.Should().Be(providerName);
+                x.Show.Should().Be(true);
+            });
+
+            providers = await client.Provider.List(providerName);
             providers.Count.Should().Be(1);
             providers.First().Action(x =>
             {

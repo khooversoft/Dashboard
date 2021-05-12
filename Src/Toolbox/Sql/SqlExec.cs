@@ -9,6 +9,7 @@ using Toolbox.Sql.Parameters;
 using Toolbox.Tools;
 using Microsoft.Extensions.Logging;
 using Toolbox.Sql.Extensions;
+using Toolbox.Extensions;
 
 namespace Toolbox
 {
@@ -75,7 +76,7 @@ namespace Toolbox
         {
             name.VerifyNotEmpty(nameof(name));
 
-            if (!addValueIfNull && value?.Equals(default(T)) == true)
+            if (!addValueIfNull && value.IsNull())
             {
                 return this;
             }

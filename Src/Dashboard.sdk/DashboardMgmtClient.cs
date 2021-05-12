@@ -23,15 +23,12 @@ namespace Dashboard.sdk
 
             Provider = new Provider(_connectionString, logger);
             Stage = new Stage(_connectionString, logger);
-            Engagement = new Engagement(_connectionString, logger);
             StageHistory = new StageHistory(_connectionString, logger);
         }
 
         public Provider Provider { get; }
 
         public Stage Stage { get; }
-
-        public Engagement Engagement { get; }
 
         public StageHistory StageHistory { get; }
     }

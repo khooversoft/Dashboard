@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Toolbox.Tools;
 
@@ -10,10 +11,9 @@ namespace Toolbox.Sql.Parameters
     [DebuggerDisplay("Name={Name}, Value={Value}")]
     public class SqlSimpleParameter : ISqlParameter
     {
-        public SqlSimpleParameter(string name, object value)
+        public SqlSimpleParameter(string name, object? value)
         {
             name.VerifyNotEmpty(nameof(name));
-            value.VerifyNotNull(nameof(value));
 
             Name = name;
             Value = value;
@@ -27,7 +27,7 @@ namespace Toolbox.Sql.Parameters
         /// <summary>
         /// Value of the parameter
         /// </summary>
-        public object Value { get; set; }
+        public object? Value { get; set; }
 
         /// <summary>
         /// Convert to SQL Parameter
@@ -35,7 +35,15 @@ namespace Toolbox.Sql.Parameters
         /// <returns>SQL parameter</returns>
         public SqlParameter ToSqlParameter()
         {
-            return new SqlParameter(Name, Value);
+            return Value switch
+            {
+                null => new SqlParameter(Name, DBNull.Value),
+
+                _ => new SqlParameter(Name, Value),
+            };
+
+            //if (Value == null) return new SqlParameter(Name, DBNull.Value);
+            //return new SqlParameter(Name, Value);
         }
     }
 }

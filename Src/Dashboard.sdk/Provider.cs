@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Dashboard.sdk.Records;
 using Microsoft.Extensions.Logging;
 using Toolbox;
+using Toolbox.Extensions;
+using Toolbox.Sql;
 
 namespace Dashboard.sdk
 {
@@ -21,6 +23,22 @@ namespace Dashboard.sdk
             _logger = logger;
         }
 
+        public async Task Delete(string provider) => await new SqlExec(_connectionString, _logger)
+            .SetCommand("[App].[Delete-Provider]", CommandType.StoredProcedure)
+            .AddParameter(nameof(provider), provider)
+            .ExecuteNonQuery();
+
+        public async Task<IReadOnlyList<ProviderRecord>> List(string? provider = null)
+        {
+            string cmd = new SqlViewBuilder("[App].[View-Provider]")
+                .Restrict("[Provider]", provider)
+                .Build();
+
+            return await new SqlExec(_connectionString, _logger)
+                .SetCommand(cmd, CommandType.Text)
+                .Execute(ProviderRecord.Read);
+        }
+
         public async Task<int> Set(string provider, bool show)
         {
             IReadOnlyList<ReturnId> returnId = await new SqlExec(_connectionString, _logger)
@@ -30,21 +48,6 @@ namespace Dashboard.sdk
                 .Execute<ReturnId>(ReturnId.Read);
 
             return returnId.First().Id;
-        }
-
-        public async Task Delete(string provider)
-        {
-            await new SqlExec(_connectionString, _logger)
-                .SetCommand("[App].[Delete-Provider]", CommandType.StoredProcedure)
-                .AddParameter(nameof(provider), provider)
-                .ExecuteNonQuery();
-        }
-
-        public async Task<IReadOnlyList<ProviderRecord>> List()
-        {
-            return await new SqlExec(_connectionString, _logger)
-                .SetCommand("SELECT * FROM [App].[View-Provider]", CommandType.Text)
-                .Execute(ProviderRecord.Read);
         }
     }
 }
