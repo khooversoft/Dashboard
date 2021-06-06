@@ -11,37 +11,60 @@
 
 <PageMenu MenuCollection="@MenuCollection" />
 
-<table class="table table-hover table-striped">
-    <thead>
-        <tr>
-            <th style="width:37%">Provider</th>
-            <th style="width:36%">Stage</th>
-            <th style="width:10%">Start Date</th>
-            <th style="width:10%">Completed Date</th>
-            <th>**</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var record in Records)
-        {
-            string style = _markedId == record.StageHistoryId ? "background: lightblue" : string.Empty;
-
-            <tr style="@style" @onclick="() => RowClick(record.StageHistoryId)">
-                <td>@record.Provider</td>
-                <td>@record.Stage</td>
-                <td>@(record.StartDate?.ToShortDateString() ?? string.Empty)</td>
-                <td>@(record.CompletedDate?.ToShortDateString() ?? string.Empty)</td>
+<div class="mt-4">
+    <table class="table table-hover table-striped table-sm">
+        <thead>
+            <tr>
+                <th style="width:37%">Provider</th>
+                <th style="width:36%">Stage</th>
+                <th style="width:10%">Start Date</th>
+                <th style="width:10%">Completed Date</th>
+                <th>**</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var record in Records)
+            {
+                string trClass = _selectedId == record.StageHistoryId ? "table-primary" : string.Empty;
+
+                <tr class="@trClass" @onclick="() => RowClick(record.StageHistoryId)">
+                    <td>@record.Provider</td>
+                    <td>@record.Stage</td>
+                    <td>@(record.StartDate?.ToShortDateString() ?? string.Empty)</td>
+                    <td>@(record.CompletedDate?.ToShortDateString() ?? string.Empty)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Modal @ref="Modal">
+    <Title>Delete Engagement</Title>
+    <Body>
+        <p>
+            Do you want to delete <span class="font-weight-bold">@_selectedId</span> metadata?
+        </p>
+
+        <div class="alert alert-warning" role="alert">
+            Warning, this will delete the metadata and is not recoverable without re-adding.
+        </div>
+
+    </Body>
+    <Footer>
+        <NavLink @onclick="Delete" class="btn btn-primary model-normal-button">Delete</NavLink>
+        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => Modal.Close()">Close</button>
+    </Footer>
+</Modal>
+
 
 @code {
-    private MenuCollection MenuCollection { get; set; }
+    private MenuCollection MenuCollection { get; set; } = null!;
 
     private IReadOnlyList<StageHistoryRecord> Records { get; set; } = new List<StageHistoryRecord>();
 
-    private int? _markedId { get; set; } = null;
+    private int? _selectedId { get; set; } = null;
+
+    private Modal Modal { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,31 +75,54 @@
 
     private void RowClick(int id)
     {
-        _markedId = id;
+        _selectedId = id;
         SetMenu();
     }
 
     private void SetMenu()
     {
         MenuCollection = new MenuCollection
-        {
+{
             new MenuItem("Add", $"stage/add", "oi-plus", true),
             new MenuButton("Refresh", Refresh, "oi-reload", true),
             new MenuDivider(),
-            new MenuButton("Delete", Delete, "oi-circle-x", _markedId != null),
+            new MenuButton("Delete", ShowDeleteDialog, "oi-circle-x", _selectedId != null),
         };
     }
 
-    private async Task Refresh() => Records = await _store.Client.StageHistory.List();
+    private async Task Refresh()
+    {
+        Records = await _store.Client.StageHistory.List();
+        _selectedId = null;
+        SetMenu();
+    }
+
+    private Task ShowDeleteDialog()
+    {
+        Modal.Open();
+        return Task.CompletedTask;
+    }
+
+    //private async Task Delete()
+    //{
+    //    if (_selectedId == null) return;
+
+    //    StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)_selectedId).FirstOrDefault();
+    //    if (record == null) return;
+
+    //    await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
+    //    await Refresh();
+    //}
 
     private async Task Delete()
     {
-        if (_markedId == null) return;
+        if (_selectedId == null) return;
 
-        StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)_markedId).FirstOrDefault();
+        StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)_selectedId).FirstOrDefault();
         if (record == null) return;
 
-        await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
+        //await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
+        await Refresh();
     }
 
 }

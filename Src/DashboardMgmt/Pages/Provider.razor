@@ -7,6 +7,26 @@
 
 @inject EngagementStore _store;
 
+
+<RightPanel @ref="RightPanel">
+    <Title>Delete Provider</Title>
+    <Body>
+        <p>
+            Do you want to delete <span class="font-weight-bold">@Id</span> metadata?
+        </p>
+
+        <div class="alert alert-warning" role="alert">
+            Warning, this will delete the metadata and is not recoverable without re-adding.
+        </div>
+
+    </Body>
+    <Footer>
+        <NavLink @onclick="Delete" class="btn btn-primary model-normal-button">Delete</NavLink>
+        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => RightPanel.Close()">Close</button>
+    </Footer>
+</RightPanel>
+
+
 <PageHeader Header="Provider" SubHeader="Maintenance" />
 
 <PageMenu MenuCollection="@MenuCollection" />
@@ -30,18 +50,24 @@
     </tbody>
 </table>
 
+
+
 @code {
-    private MenuCollection MenuCollection { get; set; }
+    private MenuCollection MenuCollection { get; set; } = null!;
 
     private IReadOnlyList<ProviderRecord> Records { get; set; } = new List<ProviderRecord>();
+
+    private RightPanel RightPanel { get; set; } = null!;
+
+    private int Id = 0;
 
     protected override void OnParametersSet()
     {
         MenuCollection = new MenuCollection()
-        {
+{
             new MenuItem("Add", $"stage/add", "oi-plus", true),
             new MenuDivider(),
-            new MenuItem("Delete", $"stage/delete", "oi-circle-x", true),
+            new MenuButton("Delete", ShowDelete, "oi-circle-x", true),
         };
 
         base.OnParametersSet();
@@ -56,5 +82,16 @@
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private Task ShowDelete()
+    {
+        RightPanel.Open();
+        return Task.CompletedTask;
+    }
+
+    private void Delete()
+    {
+
     }
 }

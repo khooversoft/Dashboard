@@ -1,0 +1,52 @@
+﻿@*<div class="w3-sidebar w3-bar-block w3-card" style="width:25%;right:0;">
+    <h3 class="w3-bar-item">Menu</h3>
+    <a href="tryit.asp%3Ffilename=tryw3css_sidebar_right.html" class="w3-bar-item w3-button">Link 1</a>
+    <a href="tryit.asp%3Ffilename=tryw3css_sidebar_right.html#" class="w3-bar-item w3-button">Link 2</a>
+    <a href="tryit.asp%3Ffilename=tryw3css_sidebar_right.html#" class="w3-bar-item w3-button">Link 3</a>
+</div>
+<div class="overlay active"></div>*@
+
+<div class="w3-sidebar w3-bar-block w3-card @OverlayClass" style="width:40%;right:0;">
+    <div class="modal-dialog modal-fit">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Body
+            </div>
+            <div class="modal-footer">
+                @Footer
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="overlay @OverlayClass"></div>
+
+@code {
+    [Parameter]
+    public int WidthLevel { get; set; } = 0;
+
+    [Parameter]
+    public RenderFragment Title { get; set; } = null!;
+
+    [Parameter]
+    public RenderFragment Body { get; set; } = null!;
+
+    [Parameter]
+    public RenderFragment Footer { get; set; } = null!;
+
+    private bool Active { get; set; } = false;
+
+    private string OverlayClass => Active ? "active" : string.Empty;
+
+    private string Width => $"{(WidthLevel + 1 * 20)}%";
+
+    public void Open() => Active = true;
+
+    public void Close() => Active = false;
+}

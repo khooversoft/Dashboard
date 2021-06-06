@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox", "Toolbox\Toolbox.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashboard.sdk.test", "Dashboard.sdk.test\Dashboard.sdk.test.csproj", "{009BFA1D-1FB4-4390-8EFA-747BCC9F8E4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashboardMgmt", "DashboardMgmt\DashboardMgmt.csproj", "{48863D71-A320-40B9-A440-7897C18892F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DashboardMgmt", "DashboardMgmt\DashboardMgmt.csproj", "{48863D71-A320-40B9-A440-7897C18892F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

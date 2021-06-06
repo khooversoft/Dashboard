@@ -31,6 +31,6 @@ namespace DashboardMgmt.Application.Menu
         public string IconName { get; }
         public bool Enabled { get; }
 
-        public MenuItem[] Children { get; set; }
+        public MenuItem[]? Children { get; set; }
     }
 }

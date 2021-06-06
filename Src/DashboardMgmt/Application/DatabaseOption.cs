@@ -8,7 +8,7 @@ namespace DashboardMgmt.Application
 {
     public class DatabaseOption
     {
-        public string ConnectionString { get; set; }
+        public string ConnectionString { get; set; } = null!;
     }
 
     public static class DatabaseOptionExtensions

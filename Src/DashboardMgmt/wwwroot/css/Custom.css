@@ -40,3 +40,8 @@ td {
     font-size: .8rem;
     font-weight: 500;
 }
+
+.nav-link.disabled {
+    color: #cecece !important;
+}
+
