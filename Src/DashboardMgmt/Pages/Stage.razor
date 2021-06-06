@@ -1,0 +1,62 @@
+﻿@page "/stage"
+
+@using DashboardMgmt.Application.Menu;
+@using DashboardMgmt.Components;
+@using DashboardMgmt.Services;
+@using Dashboard.sdk.Records;
+
+@inject EngagementStore _store;
+
+<PageHeader Header="Stage" SubHeader="Maintenance" />
+
+<PageMenu MenuCollection="@MenuCollection" />
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th style="width:70%">Stage</th>
+            <th style="width:20%">Order Number</th>
+            <th>**</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Records)
+        {
+            <tr>
+                <td>@record.Stage</td>
+                <td>@record.OrderNumber</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private MenuCollection MenuCollection { get; set; }
+
+    private IReadOnlyList<StageRecord> Records { get; set; } = new List<StageRecord>();
+
+    protected override void OnParametersSet()
+    {
+        MenuCollection = new MenuCollection()
+        {
+            new MenuItem("Add", $"stage/add", "oi-plus", true),
+            new MenuDivider(),
+            new MenuItem("Delete", $"stage/delete", "oi-circle-x", true),
+        };
+
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Records = await _store.Client.Stage.List();
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+}

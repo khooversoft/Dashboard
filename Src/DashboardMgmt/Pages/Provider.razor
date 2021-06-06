@@ -1,0 +1,60 @@
+﻿@page "/provider"
+
+@using DashboardMgmt.Application.Menu;
+@using DashboardMgmt.Components;
+@using DashboardMgmt.Services;
+@using Dashboard.sdk.Records;
+
+@inject EngagementStore _store;
+
+<PageHeader Header="Provider" SubHeader="Maintenance" />
+
+<PageMenu MenuCollection="@MenuCollection" />
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th style="width:70%">Provider</th>
+            <th style="width:20%">Show in Report</th>
+            <th>**</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Records)
+        {
+            <tr>
+                <td>@record.Provider</td>
+                <td>@(record.Show ? "True" : "False")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private MenuCollection MenuCollection { get; set; }
+
+    private IReadOnlyList<ProviderRecord> Records { get; set; } = new List<ProviderRecord>();
+
+    protected override void OnParametersSet()
+    {
+        MenuCollection = new MenuCollection()
+        {
+            new MenuItem("Add", $"stage/add", "oi-plus", true),
+            new MenuDivider(),
+            new MenuItem("Delete", $"stage/delete", "oi-circle-x", true),
+        };
+
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Records = await _store.Client.Provider.List();
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

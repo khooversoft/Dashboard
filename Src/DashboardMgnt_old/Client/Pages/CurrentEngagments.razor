@@ -1,0 +1,25 @@
+﻿@page "/current"
+
+@using DashboardMgnt.Client.Application.Menu;
+
+@*<PageHeader Header="Current" />*@
+
+<PageMenu MenuCollection="@MenuCollection" />
+
+<h3>CurrentEngagments</h3>
+
+@code {
+    public MenuCollection MenuCollection { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        MenuCollection = new MenuCollection()
+        {
+            new MenuItem("Add", $"stage/add", "oi-plus", true),
+            new MenuDivider(),
+            new MenuItem("Delete", $"stage/delete", "oi-circle-x", true),
+        };
+
+        base.OnParametersSet();
+    }
+}

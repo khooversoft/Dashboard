@@ -1,0 +1,82 @@
+﻿@page "/current"
+
+@using DashboardMgmt.Application.Menu;
+@using DashboardMgmt.Components;
+@using DashboardMgmt.Services;
+@using Dashboard.sdk.Records;
+
+@inject EngagementStore _store;
+
+<PageHeader Header="Engagement" SubHeader="Current" />
+
+<PageMenu MenuCollection="@MenuCollection" />
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th style="width:37%">Provider</th>
+            <th style="width:36%">Stage</th>
+            <th style="width:10%">Start Date</th>
+            <th style="width:10%">Completed Date</th>
+            <th>**</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Records)
+        {
+            string style = _markedId == record.StageHistoryId ? "background: lightblue" : string.Empty;
+
+            <tr style="@style" @onclick="() => RowClick(record.StageHistoryId)">
+                <td>@record.Provider</td>
+                <td>@record.Stage</td>
+                <td>@(record.StartDate?.ToShortDateString() ?? string.Empty)</td>
+                <td>@(record.CompletedDate?.ToShortDateString() ?? string.Empty)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private MenuCollection MenuCollection { get; set; }
+
+    private IReadOnlyList<StageHistoryRecord> Records { get; set; } = new List<StageHistoryRecord>();
+
+    private int? _markedId { get; set; } = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SetMenu();
+        await Refresh();
+        await base.OnInitializedAsync();
+    }
+
+    private void RowClick(int id)
+    {
+        _markedId = id;
+        SetMenu();
+    }
+
+    private void SetMenu()
+    {
+        MenuCollection = new MenuCollection
+        {
+            new MenuItem("Add", $"stage/add", "oi-plus", true),
+            new MenuButton("Refresh", Refresh, "oi-reload", true),
+            new MenuDivider(),
+            new MenuButton("Delete", Delete, "oi-circle-x", _markedId != null),
+        };
+    }
+
+    private async Task Refresh() => Records = await _store.Client.StageHistory.List();
+
+    private async Task Delete()
+    {
+        if (_markedId == null) return;
+
+        StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)_markedId).FirstOrDefault();
+        if (record == null) return;
+
+        await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
+    }
+
+}
