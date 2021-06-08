@@ -1,0 +1,41 @@
+﻿
+<RightPanel @ref="RightPanel" WidthLevel="1">
+    <Title>@Title</Title>
+    <Body>
+        <p>
+            Do you want to delete <span class="font-weight-bold">@DeleteId</span> @ObjectName?
+        </p>
+
+        <div class="alert alert-warning" role="alert">
+            Warning, this action is not recoverable.
+        </div>
+
+    </Body>
+    <Footer>
+        <NavLink @onclick="Delete" class="btn alert-danger model-normal-button">Delete</NavLink>
+        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => RightPanel.Close()">Close</button>
+    </Footer>
+</RightPanel>
+
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = null!;
+
+    [Parameter]
+    public string DeleteId { get; set; } = null!;
+
+    [Parameter]
+    public string ObjectName { get; set; } = "unknown";
+
+    [Parameter]
+    public Func<Task> DeleteAction { get; set; } = null!;
+
+    private RightPanel RightPanel { get; set; } = null!;
+
+    private async Task Delete() => await DeleteAction();
+
+    public void Open() => RightPanel.Open();
+
+    public void Close() => RightPanel.Close();
+}

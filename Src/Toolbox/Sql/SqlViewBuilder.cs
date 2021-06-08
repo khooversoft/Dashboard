@@ -11,7 +11,7 @@ namespace Toolbox.Sql
     public class SqlViewBuilder
     {
         private readonly string _sqlObject;
-        private readonly List<(string ColumnName, string Value)> _restrictList = new List<(string ColumnName, string Value)>();
+        private readonly List<(string ColumnName, object Value)> _restrictList = new List<(string ColumnName, object Value)>();
 
         public SqlViewBuilder(string sqlObject)
         {
@@ -20,11 +20,16 @@ namespace Toolbox.Sql
             _sqlObject = sqlObject;
         }
 
-        public SqlViewBuilder Restrict(string columnName, string? value)
+        public SqlViewBuilder Restrict<T>(string columnName, T? value)
         {
             columnName.VerifyNotEmpty(name: (columnName));
 
-            if (value.IsEmpty()) return this;
+            switch(value)
+            {
+                case null: return this;
+
+                case string v when v.IsEmpty(): return this;
+            }
 
             _restrictList.Add((columnName, value));
             return this;
@@ -37,10 +42,19 @@ namespace Toolbox.Sql
             if( _restrictList.Count > 0)
             {
                 cmd += " WHERE ";
-                cmd += string.Join(" AND ", _restrictList.Select(x => $"{x.ColumnName} = '{x.Value}'"));
+                cmd += string.Join(" AND ", _restrictList.Select(x => $"{x.ColumnName} = {GetValue(x.Value)}"));
             }
 
             return cmd;
         }
+
+        private string GetValue(object subject) => subject switch
+        {
+            null => "NULL",
+            string v => $"'{v}'",
+            DateTime v => $"'{v.ToShortDateString()}'",
+
+            _ => subject?.ToString() ?? string.Empty,
+        };
     }
 }

@@ -1,0 +1,99 @@
+﻿@using DashboardMgmt.Application.Menu;
+@using DashboardMgmt.Model;
+@using DashboardMgmt.Services;
+@using Dashboard.sdk.Records;
+
+
+@inject EngagementStore _store;
+
+<RightPanel @ref="RightPanel" WidthLevel="2">
+    <Title>@Title</Title>
+    <Body>
+
+        <EditForm Model=@Model OnValidSubmit=@OnValidSubmit>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label>Provider</label>
+                <InputText class="@FormControClass(!Create)" DisplayName="Provider's name" @bind-Value="Model.Provider" />
+            </div>
+
+            <div class="form-group">
+                <label>Stage</label>
+                <InputText class="@FormControClass(!Create)" DisplayName="Stage" @bind-Value="Model.Stage" />
+            </div>
+
+            <div class="form-group">
+                <label>Start Date</label>
+                <InputDate class="@FormControClass(false)" DisplayName="Stage" @bind-Value="Model.StartDate" />
+            </div>
+
+            <div class="form-group">
+                <label>Completed Date</label>
+                <InputDate class="@FormControClass(false)" DisplayName="Stage" @bind-Value="Model.CompletedDate" />
+            </div>
+
+        </EditForm>
+
+    </Body>
+    <Footer>
+        <NavLink @onclick="CreateOrUpdate" class="@ButtonClass">@CreateOrUpdateText</NavLink>
+        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => RightPanel.Close()">Cancel</button>
+    </Footer>
+</RightPanel>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public Func<Task> Callback { get; set; } = null!;
+
+    public StageHistoryModel Model { get; set; } = new();
+
+    private RightPanel RightPanel { get; set; } = null!;
+
+    private bool Create { get; set; } = false;
+
+    private bool ReadyToSet { get; set; } = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        StageHistoryModel? record = null;
+
+        if (Id >= 0)
+        {
+            record = (await _store.Client.StageHistory.List(stageHistoryId: Id)).FirstOrDefault()?.ConvertTo();
+        }
+
+        Create = record == null;
+        Model = record ?? new();
+
+        await base.OnParametersSetAsync();
+    }
+
+    private string CreateOrUpdateText => Create ? "Create" : "Save";
+    private string Title => (Create ? "Create" : "Update") + " Engagement";
+    private string FormControClass(bool disable) => "form-control" + (disable ? " disabled" : string.Empty);
+    private string ButtonClass => "btn " + (Create ? "alert-success" : "alert-danger");
+
+    public void Open() => RightPanel.Open();
+    public void Close() => RightPanel.Close();
+
+    private Task OnCancel()
+    {
+        Close();
+        return Task.CompletedTask;
+    }
+
+    private void OnValidSubmit() => ReadyToSet = true;
+
+    private async Task CreateOrUpdate()
+    {
+        await _store.Client.StageHistory.Set(Model.Provider, Model.Stage, Model.StartDate, Model.CompletedDate);
+        Close();
+        await Callback();
+    }
+}

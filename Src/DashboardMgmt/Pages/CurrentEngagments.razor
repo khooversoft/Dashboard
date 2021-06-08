@@ -7,6 +7,10 @@
 
 @inject EngagementStore _store;
 
+<ConfirmDelete @ref="DeletePanel" Title="Delete Engagement" ObjectName="Engagement" DeleteId="@(SelectedId?.ToString() ?? "**")" DeleteAction="async () => await Delete()"/>
+
+<AddEditEngagement @ref="EditPanel" Callback="async () => await Refresh()" Id=@EditId/>
+
 <PageHeader Header="Engagement" SubHeader="Current" />
 
 <PageMenu MenuCollection="@MenuCollection" />
@@ -25,7 +29,7 @@
         <tbody>
             @foreach (var record in Records)
             {
-                string trClass = _selectedId == record.StageHistoryId ? "table-primary" : string.Empty;
+                string trClass = SelectedId == record.StageHistoryId ? "table-primary" : string.Empty;
 
                 <tr class="@trClass" @onclick="() => RowClick(record.StageHistoryId)">
                     <td>@record.Provider</td>
@@ -38,33 +42,19 @@
     </table>
 </div>
 
-<Modal @ref="Modal">
-    <Title>Delete Engagement</Title>
-    <Body>
-        <p>
-            Do you want to delete <span class="font-weight-bold">@_selectedId</span> metadata?
-        </p>
-
-        <div class="alert alert-warning" role="alert">
-            Warning, this will delete the metadata and is not recoverable without re-adding.
-        </div>
-
-    </Body>
-    <Footer>
-        <NavLink @onclick="Delete" class="btn btn-primary model-normal-button">Delete</NavLink>
-        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => Modal.Close()">Close</button>
-    </Footer>
-</Modal>
-
 
 @code {
     private MenuCollection MenuCollection { get; set; } = null!;
 
     private IReadOnlyList<StageHistoryRecord> Records { get; set; } = new List<StageHistoryRecord>();
 
-    private int? _selectedId { get; set; } = null;
+    private int? SelectedId { get; set; } = null;
 
-    private Modal Modal { get; set; } = null!;
+    private int EditId { get; set; }
+
+    private AddEditEngagement EditPanel { get; set; } = null!;
+
+    private ConfirmDelete DeletePanel { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,7 +65,7 @@
 
     private void RowClick(int id)
     {
-        _selectedId = id;
+        SelectedId = id;
         SetMenu();
     }
 
@@ -83,42 +73,50 @@
     {
         MenuCollection = new MenuCollection
 {
-            new MenuItem("Add", $"stage/add", "oi-plus", true),
-            new MenuButton("Refresh", Refresh, "oi-reload", true),
+            new MenuButton("Add", OnAdd, "oi-plus", true),
+            new MenuButton("Edit", OnEdit, "oi-plus", true),
             new MenuDivider(),
-            new MenuButton("Delete", ShowDeleteDialog, "oi-circle-x", _selectedId != null),
+            new MenuButton("Delete", OnDelete, "oi-circle-x", SelectedId != null),
+            new MenuButton("Refresh", Refresh, "oi-reload", true),
         };
     }
 
     private async Task Refresh()
     {
         Records = await _store.Client.StageHistory.List();
-        _selectedId = null;
+        SelectedId = null;
         SetMenu();
+
+        StateHasChanged();
     }
 
-    private Task ShowDeleteDialog()
+    private Task OnAdd()
     {
-        Modal.Open();
+        EditId = -1;
+        EditPanel.Open();
         return Task.CompletedTask;
     }
 
-    //private async Task Delete()
-    //{
-    //    if (_selectedId == null) return;
+    private Task OnEdit()
+    {
+        EditId = (int)SelectedId!;
+        EditPanel.Open();
+        return Task.CompletedTask;
+    }
 
-    //    StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)_selectedId).FirstOrDefault();
-    //    if (record == null) return;
-
-    //    await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
-    //    await Refresh();
-    //}
+    private Task OnDelete()
+    {
+        DeletePanel.Open();
+        return Task.CompletedTask;
+    }
 
     private async Task Delete()
     {
-        if (_selectedId == null) return;
+        DeletePanel.Close();
 
-        StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)_selectedId).FirstOrDefault();
+        if (SelectedId == null) return;
+
+        StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)SelectedId).FirstOrDefault();
         if (record == null) return;
 
         //await _store.Client.StageHistory.Delete(record.Provider, record.Stage);

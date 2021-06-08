@@ -8,7 +8,7 @@
 @inject EngagementStore _store;
 
 
-<RightPanel @ref="RightPanel">
+<RightPanel @ref="RightPanel" WidthLevel="1">
     <Title>Delete Provider</Title>
     <Body>
         <p>
@@ -92,6 +92,6 @@
 
     private void Delete()
     {
-
+        RightPanel.Close();
     }
 }

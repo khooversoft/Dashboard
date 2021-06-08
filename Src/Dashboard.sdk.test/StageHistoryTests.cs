@@ -46,7 +46,7 @@ namespace Dashboard.sdk.test
 
             await client.StageHistory.Set(providerName, stageName, startDate, null);
 
-            stageHistories = await client.StageHistory.List(providerName, stageName);
+            stageHistories = await client.StageHistory.List(provider: providerName, stage: stageName);
             stageHistories.Count.Should().Be(1);
             stageHistories.First().Action(x =>
             {
@@ -60,7 +60,7 @@ namespace Dashboard.sdk.test
 
             await client.StageHistory.Set(providerName, stageName, startDate, completedDate);
 
-            stageHistories = await client.StageHistory.List(providerName);
+            stageHistories = await client.StageHistory.List(provider: providerName);
             stageHistories.Count.Should().Be(1);
             stageHistories.First().Action(x =>
             {

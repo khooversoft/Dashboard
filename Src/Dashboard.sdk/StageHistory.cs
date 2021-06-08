@@ -28,9 +28,10 @@ namespace Dashboard.sdk
             .SetCommand("[App].[Delete-StageHistory]", CommandType.StoredProcedure)
             .ExecuteNonQuery();
 
-        public async Task<IReadOnlyList<StageHistoryRecord>> List(string? provider = null, string? stage = null)
+        public async Task<IReadOnlyList<StageHistoryRecord>> List(int? stageHistoryId = null, string? provider = null, string? stage = null)
         {
             string cmd = new SqlViewBuilder("[App].[View-StageHistory]")
+                .Restrict("[StageHistoryId]", stageHistoryId)
                 .Restrict("[Provider]", provider)
                 .Restrict("[Stage]", stage)
                 .Build();
