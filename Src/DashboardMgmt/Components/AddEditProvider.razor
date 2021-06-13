@@ -1,0 +1,98 @@
+﻿@using DashboardMgmt.Application.Menu;
+@using DashboardMgmt.Model;
+@using DashboardMgmt.Services;
+@using Dashboard.sdk.Records;
+@using Toolbox.StateValidation;
+
+
+@inject EngagementStore _store;
+
+<RightPanel @ref="RightPanel" WidthLevel="3">
+    <Title>@Title</Title>
+    <Body>
+
+        <EditForm EditContext="@EditContext">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label>Provider <RequiredSymbol /></label>
+                <InputText class=@FormControllClass DisplayName="Provider's name" @bind-Value="Model.Provider" />
+                <ValidationMessage For=@(() => Model.Provider) />
+            </div>
+
+            <div class="row align-items-center">
+                <label class="col-md-1">Show</label>
+                <label class="switch">
+                    <InputCheckbox @bind-Value="Model.Show" />
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </EditForm>
+
+    </Body>
+    <Footer>
+        <NavLink @onclick="CreateOrUpdate" class="btn alert-success">@CreateOrUpdateText</NavLink>
+        <NavLink @onclick="() => RightPanel.Close()" class="btn btn-light">Cancel</NavLink>
+    </Footer>
+</RightPanel>
+
+
+@code {
+    [Parameter]
+    public int? ProviderId { get; set; }
+
+    [Parameter]
+    public Func<Task> Callback { get; set; } = null!;
+
+    public ProviderModel Model { get; set; } = new();
+
+    private RightPanel RightPanel { get; set; } = null!;
+
+    private EditContext EditContext { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(Model);
+
+        base.OnInitialized();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(ProviderId != null)
+        {
+            ProviderModel? record = (await _store.Client.Provider.List(providerId: (int)ProviderId)).FirstOrDefault()?.ConvertTo();
+            if( record != null)
+            {
+                Model.Provider = record.Provider;
+                Model.Show = record.Show;
+            }
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private string CreateOrUpdateText => ProviderId == null ? "Create" : "Save";
+    private string Title => (ProviderId == null ? "Create" : "Update") + " Provider";
+    private string FormControllClass => "form-control" + (ProviderId != null ? " disabled" : string.Empty);
+
+    public void Open() => RightPanel.Open();
+    public void Close() => RightPanel.Close();
+
+    private Task OnCancel()
+    {
+        Close();
+        return Task.CompletedTask;
+    }
+
+    private async Task CreateOrUpdate()
+    {
+        bool validationState = EditContext.Validate();
+        if (!validationState) return;
+
+        await _store.Client.Provider.Set(Model.Provider, Model.Show);
+
+        Close();
+        await Callback();
+    }
+}

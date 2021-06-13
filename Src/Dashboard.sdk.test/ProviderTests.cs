@@ -34,7 +34,7 @@ namespace Dashboard.sdk.test
                 x.Show.Should().Be(true);
             });
 
-            providers = await client.Provider.List(providerName);
+            providers = await client.Provider.List(provider: providerName);
             providers.Count.Should().Be(1);
             providers.First().Action(x =>
             {

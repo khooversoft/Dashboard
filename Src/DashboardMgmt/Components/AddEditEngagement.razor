@@ -2,6 +2,7 @@
 @using DashboardMgmt.Model;
 @using DashboardMgmt.Services;
 @using Dashboard.sdk.Records;
+@using System.ComponentModel.DataAnnotations;
 
 
 @inject EngagementStore _store;
@@ -10,28 +11,29 @@
     <Title>@Title</Title>
     <Body>
 
-        <EditForm Model=@Model OnValidSubmit=@OnValidSubmit>
+        <EditForm EditContext="@EditContext">
             <DataAnnotationsValidator />
-            <ValidationSummary />
 
             <div class="form-group">
-                <label>Provider</label>
-                <InputText class="@FormControClass(!Create)" DisplayName="Provider's name" @bind-Value="Model.Provider" />
+                <label>Provider <RequiredSymbol /></label>
+                <InputText class="@FormControllClass(!Create)" DisplayName="Provider's name" @bind-Value="StageModel.Provider" />
+                <ValidationMessage For=@(() => StageModel.Provider) />
             </div>
 
             <div class="form-group">
                 <label>Stage</label>
-                <InputText class="@FormControClass(!Create)" DisplayName="Stage" @bind-Value="Model.Stage" />
+                <InputText class="@FormControllClass(!Create)" DisplayName="Stage" @bind-Value="StageModel.Stage" />
+                <ValidationMessage For=@(() => StageModel.Stage) />
             </div>
 
             <div class="form-group">
                 <label>Start Date</label>
-                <InputDate class="@FormControClass(false)" DisplayName="Stage" @bind-Value="Model.StartDate" />
+                <InputDate class="@FormControllClass(false)" DisplayName="Stage" @bind-Value="StageModel.StartDate" />
             </div>
 
             <div class="form-group">
                 <label>Completed Date</label>
-                <InputDate class="@FormControClass(false)" DisplayName="Stage" @bind-Value="Model.CompletedDate" />
+                <InputDate class="@FormControllClass(false)" DisplayName="Stage" @bind-Value="StageModel.CompletedDate" />
             </div>
 
         </EditForm>
@@ -39,7 +41,7 @@
     </Body>
     <Footer>
         <NavLink @onclick="CreateOrUpdate" class="@ButtonClass">@CreateOrUpdateText</NavLink>
-        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => RightPanel.Close()">Cancel</button>
+        <NavLink @onclick="() => RightPanel.Close()" class="btn btn-light">Cancel</NavLink>
     </Footer>
 </RightPanel>
 
@@ -51,32 +53,40 @@
     [Parameter]
     public Func<Task> Callback { get; set; } = null!;
 
-    public StageHistoryModel Model { get; set; } = new();
+    private StageHistoryModel StageModel { get; set; } = new();
 
     private RightPanel RightPanel { get; set; } = null!;
 
     private bool Create { get; set; } = false;
 
+    private EditContext EditContext { get; set; } = null!;
+
+    private Dictionary<string, string> ProviderErrorMsg { get; set; } = new Dictionary<string, string>(new[] { new KeyValuePair<string, string>("Provider", string.Empty) });
+
     private bool ReadyToSet { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(StageModel);
+        base.OnInitialized();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
-        StageHistoryModel? record = null;
-
         if (Id >= 0)
         {
-            record = (await _store.Client.StageHistory.List(stageHistoryId: Id)).FirstOrDefault()?.ConvertTo();
+            StageHistoryModel? record = (await _store.Client.StageHistory.List(stageHistoryId: Id)).FirstOrDefault()?.ConvertTo();
         }
 
-        Create = record == null;
-        Model = record ?? new();
+        //Create = record == null;
+        //StageModel = record ?? new();
 
         await base.OnParametersSetAsync();
     }
 
     private string CreateOrUpdateText => Create ? "Create" : "Save";
     private string Title => (Create ? "Create" : "Update") + " Engagement";
-    private string FormControClass(bool disable) => "form-control" + (disable ? " disabled" : string.Empty);
+    private string FormControllClass(bool disable) => "form-control" + (disable ? " disabled" : string.Empty);
     private string ButtonClass => "btn " + (Create ? "alert-success" : "alert-danger");
 
     public void Open() => RightPanel.Open();
@@ -88,12 +98,17 @@
         return Task.CompletedTask;
     }
 
-    private void OnValidSubmit() => ReadyToSet = true;
-
     private async Task CreateOrUpdate()
     {
-        await _store.Client.StageHistory.Set(Model.Provider, Model.Stage, Model.StartDate, Model.CompletedDate);
-        Close();
-        await Callback();
+        bool validationState = EditContext.Validate();
+        if (!validationState) return;
+
+        //var results = EditContext.GetValidationMessages();
+        //await InvokeAsync(() => StateHasChanged());
+
+
+        //await _store.Client.StageHistory.Set(Model.Provider, Model.Stage, Model.StartDate, Model.CompletedDate);
+        //Close();
+        //await Callback();
     }
 }

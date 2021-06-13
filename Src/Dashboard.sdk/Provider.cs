@@ -28,9 +28,10 @@ namespace Dashboard.sdk
             .AddParameter(nameof(provider), provider)
             .ExecuteNonQuery();
 
-        public async Task<IReadOnlyList<ProviderRecord>> List(string? provider = null)
+        public async Task<IReadOnlyList<ProviderRecord>> List(int? providerId = null, string? provider = null)
         {
             string cmd = new SqlViewBuilder("[App].[View-Provider]")
+                .Restrict("[ProviderId]", providerId)
                 .Restrict("[Provider]", provider)
                 .Build();
 

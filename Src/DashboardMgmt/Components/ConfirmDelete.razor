@@ -3,7 +3,7 @@
     <Title>@Title</Title>
     <Body>
         <p>
-            Do you want to delete <span class="font-weight-bold">@DeleteId</span> @ObjectName?
+            Do you want to delete <span class="font-weight-bold">@DeleteName</span> @ObjectName?
         </p>
 
         <div class="alert alert-warning" role="alert">
@@ -23,7 +23,7 @@
     public string Title { get; set; } = null!;
 
     [Parameter]
-    public string DeleteId { get; set; } = null!;
+    public string DeleteName { get; set; } = null!;
 
     [Parameter]
     public string ObjectName { get; set; } = "unknown";

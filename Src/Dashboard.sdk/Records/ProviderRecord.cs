@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Toolbox.Sql.Extensions;
 
 namespace Dashboard.sdk.Records
@@ -15,7 +10,6 @@ namespace Dashboard.sdk.Records
         public string Provider { get; init; } = null!;
 
         public bool Show { get; init; }
-
 
         public static ProviderRecord Read(SqlDataReader reader)
         {

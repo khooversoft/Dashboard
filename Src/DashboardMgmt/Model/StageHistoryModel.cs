@@ -20,6 +20,8 @@ namespace DashboardMgmt.Model
         public DateTime? StartDate { get; set; }
 
         public DateTime? CompletedDate { get; set; }
+
+        public Guid Instance { get; } = Guid.NewGuid();
     }
 
     public static class StageHistoryModelExtensions

@@ -7,25 +7,9 @@
 
 @inject EngagementStore _store;
 
+<ConfirmDelete @ref="DeletePanel" Title="Delete Provider" ObjectName="Provider" DeleteName=@GetDeleteName() DeleteAction="async () => await Delete()" />
 
-<RightPanel @ref="RightPanel" WidthLevel="1">
-    <Title>Delete Provider</Title>
-    <Body>
-        <p>
-            Do you want to delete <span class="font-weight-bold">@Id</span> metadata?
-        </p>
-
-        <div class="alert alert-warning" role="alert">
-            Warning, this will delete the metadata and is not recoverable without re-adding.
-        </div>
-
-    </Body>
-    <Footer>
-        <NavLink @onclick="Delete" class="btn btn-primary model-normal-button">Delete</NavLink>
-        <button type="button" class="btn btn-light model-close-button" data-dismiss="modal" @onclick="() => RightPanel.Close()">Close</button>
-    </Footer>
-</RightPanel>
-
+<AddEditProvider @ref="EditPanel" Callback="async () => await Refresh()" ProviderId=@SelectedId />
 
 <PageHeader Header="Provider" SubHeader="Maintenance" />
 
@@ -42,7 +26,9 @@
     <tbody>
         @foreach (var record in Records)
         {
-            <tr>
+            string trClass = SelectedId == record.ProviderId ? "table-primary" : string.Empty;
+
+            <tr class="@trClass" @onclick="() => RowClick(record.ProviderId)">
                 <td>@record.Provider</td>
                 <td>@(record.Show ? "True" : "False")</td>
             </tr>
@@ -57,41 +43,76 @@
 
     private IReadOnlyList<ProviderRecord> Records { get; set; } = new List<ProviderRecord>();
 
-    private RightPanel RightPanel { get; set; } = null!;
+    private int? SelectedId { get; set; } = null;
 
-    private int Id = 0;
+    private AddEditProvider EditPanel { get; set; } = null!;
 
-    protected override void OnParametersSet()
+    private ConfirmDelete DeletePanel { get; set; } = null!;
+
+    private string GetDeleteName() => Records.Where(x => x.ProviderId == (SelectedId ?? -1)).FirstOrDefault()?.Provider ?? string.Empty;
+
+    protected override async Task OnInitializedAsync()
     {
-        MenuCollection = new MenuCollection()
+        SetMenu();
+        await Refresh();
+        await base.OnInitializedAsync();
+    }
+
+    private void RowClick(int id)
+    {
+        SelectedId = id;
+        SetMenu();
+    }
+
+    private void SetMenu()
+    {
+        MenuCollection = new MenuCollection
 {
-            new MenuItem("Add", $"stage/add", "oi-plus", true),
+            new MenuButton("Add", OnAdd, "oi-plus", true),
+            new MenuButton("Edit", OnEdit, "oi-plus", SelectedId != null),
             new MenuDivider(),
-            new MenuButton("Delete", ShowDelete, "oi-circle-x", true),
+            new MenuButton("Delete", OnDelete, "oi-circle-x", SelectedId != null),
+            new MenuButton("Refresh", Refresh, "oi-reload", true),
         };
-
-        base.OnParametersSet();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task Refresh()
     {
-        if (firstRender)
-        {
-            Records = await _store.Client.Provider.List();
-            StateHasChanged();
-        }
+        Records = await _store.Client.Provider.List();
+        SelectedId = null;
+        SetMenu();
 
-        await base.OnAfterRenderAsync(firstRender);
+        StateHasChanged();
     }
 
-    private Task ShowDelete()
+    private Task OnAdd()
     {
-        RightPanel.Open();
+        EditPanel.Open();
         return Task.CompletedTask;
     }
 
-    private void Delete()
+    private Task OnEdit()
     {
-        RightPanel.Close();
+        EditPanel.Open();
+        return Task.CompletedTask;
+    }
+
+    private Task OnDelete()
+    {
+        DeletePanel.Open();
+        return Task.CompletedTask;
+    }
+
+    private async Task Delete()
+    {
+        DeletePanel.Close();
+
+        if (SelectedId == null) return;
+
+        ProviderRecord? record = Records.Where(x => x.ProviderId == (int)SelectedId).FirstOrDefault();
+        if (record == null) return;
+
+        await _store.Client.Provider.Delete(record.Provider);
+        await Refresh();
     }
 }
