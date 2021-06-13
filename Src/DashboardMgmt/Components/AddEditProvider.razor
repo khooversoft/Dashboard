@@ -21,11 +21,13 @@
             </div>
 
             <div class="row align-items-center">
-                <label class="col-md-1">Show</label>
-                <label class="switch">
+                <label class="col-md-1" style="min-width:5rem">Show</label>
+                <InputSwitch @bind-Value="Model.Show" />
+
+                @*<label class="switch">
                     <InputCheckbox @bind-Value="Model.Show" />
                     <span class="slider round"></span>
-                </label>
+                </label>*@
             </div>
         </EditForm>
 
