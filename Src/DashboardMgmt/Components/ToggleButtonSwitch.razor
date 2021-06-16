@@ -1,0 +1,45 @@
+﻿@using Toolbox.Extensions;
+
+<div class="btn-group">
+    @foreach (var button in GetButtons())
+    {
+        <NavLink @onclick=@(() => Update(button.Index)) class=@button.Class>@button.Text</NavLink>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<string> Buttons { get; set; } = Array.Empty<string>();
+
+    [Parameter]
+    public int Value { get; set; }
+
+    [Parameter]
+    public EventCallback<int> ValueChanged { get; set; }
+
+    private IReadOnlyList<(int Index, string Text, string Class)> GetButtons() => Buttons
+        .Select((x, i) => (i, x, GetClass(i)))
+        .ToArray();
+
+    private string GetClass(int index) => new string[]
+    {
+        GetRounded(index),
+        "btn",
+        (Value == index ? "btn-success" : "alert-secondary"),
+    }
+    .Aggregate(string.Empty, (a, x) => a += (a.IsEmpty() ? a : " ") + x);
+
+    private string GetRounded(int index) => index switch
+    {
+        0 => "leftButton",
+        int x when x == Buttons.Count - 1 => "rightButton",
+
+        _ => "rounded-0",
+    };
+
+    private async Task Update(int index)
+    {
+        Value = index;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

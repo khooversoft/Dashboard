@@ -27,9 +27,10 @@ namespace Dashboard.sdk
             .AddParameter(nameof(Stage), stage)
             .ExecuteNonQuery();
 
-        public async Task<IReadOnlyList<StageRecord>> List(string? stage = null)
+        public async Task<IReadOnlyList<StageRecord>> List(int? stageId = null, string? stage = null)
         {
             string cmd = new SqlViewBuilder("[App].[View-Stage]")
+                .Restrict("[StageId]", stageId)
                 .Restrict("[Stage]", stage)
                 .Build();
 

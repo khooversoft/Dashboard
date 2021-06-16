@@ -4,6 +4,8 @@
 @using Dashboard.sdk.Records;
 @using Toolbox.StateValidation;
 
+@inject IJSRuntime _js;
+
 
 @inject EngagementStore _store;
 
@@ -16,18 +18,13 @@
 
             <div class="form-group">
                 <label>Provider <RequiredSymbol /></label>
-                <InputText class=@FormControllClass DisplayName="Provider's name" @bind-Value="Model.Provider" />
+                <InputText Id=@_startFocusId class=@FormControllClass DisplayName="Provider's name" @bind-Value="Model.Provider" disabled=@IsDisabled />
                 <ValidationMessage For=@(() => Model.Provider) />
             </div>
 
             <div class="row align-items-center">
                 <label class="col-md-1" style="min-width:5rem">Show</label>
-                <InputSwitch @bind-Value="Model.Show" />
-
-                @*<label class="switch">
-                    <InputCheckbox @bind-Value="Model.Show" />
-                    <span class="slider round"></span>
-                </label>*@
+                <ToggleButtonSwitch @bind-Value="ButtonIndex" Buttons="SwitchButtons" />
             </div>
         </EditForm>
 
@@ -52,6 +49,13 @@
 
     private EditContext EditContext { get; set; } = null!;
 
+    private int ButtonIndex { get => Model.Show ? 1 : 0; set => Model.Show = value switch { 0 => false, _ => true }; }
+
+    private static IReadOnlyList<string> SwitchButtons => new[] { "No", "Yes" };
+
+    private const string _startFocusId = "start-focus";
+    private const string _existFocusId = "exist-focus";
+
     protected override void OnInitialized()
     {
         EditContext = new EditContext(Model);
@@ -61,22 +65,38 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if(ProviderId != null)
+        if (ProviderId != null)
         {
             ProviderModel? record = (await _store.Client.Provider.List(providerId: (int)ProviderId)).FirstOrDefault()?.ConvertTo();
-            if( record != null)
+            if (record != null)
             {
                 Model.Provider = record.Provider;
                 Model.Show = record.Show;
             }
         }
+        else
+        {
+            Model.Provider = string.Empty;
+            Model.Show = true;
+        }
 
         await base.OnParametersSetAsync();
     }
 
-    private string CreateOrUpdateText => ProviderId == null ? "Create" : "Save";
-    private string Title => (ProviderId == null ? "Create" : "Update") + " Provider";
-    private string FormControllClass => "form-control" + (ProviderId != null ? " disabled" : string.Empty);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (ProviderId != null)
+        {
+            await _js.InvokeVoidAsync("focusInputOnId", _startFocusId);
+        }
+    }
+
+    private bool IsAdd => IsAdd;
+    private string CreateOrUpdateText => IsAdd ? "Create" : "Save";
+    private string Title => (IsAdd ? "Create" : "Update") + " Provider";
+    private string FormControllClass => "form-control" + (IsDisabled ? " disabled" : string.Empty);
+    private string Attribute => (ProviderId != null ? "disabled" : string.Empty);
+    private bool IsDisabled => ProviderId != null;
 
     public void Open() => RightPanel.Open();
     public void Close() => RightPanel.Close();

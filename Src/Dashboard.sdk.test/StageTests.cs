@@ -34,7 +34,7 @@ namespace Dashboard.sdk.test
                 x.OrderNumber.Should().Be(10);
             });
 
-            providers = await client.Stage.List(stageName);
+            providers = await client.Stage.List(stage: stageName);
             providers.Count.Should().Be(1);
             providers.First().Action(x =>
             {

@@ -49,7 +49,7 @@
 
     private ConfirmDelete DeletePanel { get; set; } = null!;
 
-    private string GetDeleteName() => Records.Where(x => x.ProviderId == (SelectedId ?? -1)).FirstOrDefault()?.Provider ?? string.Empty;
+    private string GetDeleteName() => Records.Where(x => x.ProviderId == SelectedId).FirstOrDefault()?.Provider ?? string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,7 +78,7 @@
 
     private async Task Refresh()
     {
-        Records = await _store.Client.Provider.List();
+        Records = (await _store.Client.Provider.List()).OrderBy(x => x.Provider).ToArray();
         SelectedId = null;
         SetMenu();
 
@@ -87,6 +87,7 @@
 
     private Task OnAdd()
     {
+        SelectedId = null;
         EditPanel.Open();
         return Task.CompletedTask;
     }

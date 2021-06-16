@@ -7,6 +7,10 @@
 
 @inject EngagementStore _store;
 
+<ConfirmDelete @ref="DeletePanel" Title="Delete Provider" ObjectName="Provider" DeleteName=@GetDeleteName() DeleteAction="async () => await Delete()" />
+
+<AddEditStage @ref="EditPanel" Callback="async () => await Refresh()" StageId=@SelectedId />
+
 <PageHeader Header="Stage" SubHeader="Maintenance" />
 
 <PageMenu MenuCollection="@MenuCollection" />
@@ -22,7 +26,9 @@
     <tbody>
         @foreach (var record in Records)
         {
-            <tr>
+            string trClass = SelectedId == record.StageId ? "table-primary" : string.Empty;
+
+            <tr class="@trClass" @onclick="() => RowClick(record.StageId)">
                 <td>@record.Stage</td>
                 <td>@record.OrderNumber</td>
             </tr>
@@ -32,31 +38,75 @@
 
 @code {
     private MenuCollection MenuCollection { get; set; } = null!;
-
+    private AddEditStage EditPanel { get; set; } = null!;
+    private ConfirmDelete DeletePanel { get; set; } = null!;
     private IReadOnlyList<StageRecord> Records { get; set; } = new List<StageRecord>();
+    private int? SelectedId { get; set; } = null;
+    private string GetDeleteName() => Records.Where(x => x.StageId == SelectedId).FirstOrDefault()?.Stage ?? string.Empty;
 
-    protected override void OnParametersSet()
+    protected override async Task OnInitializedAsync()
     {
-        MenuCollection = new MenuCollection()
-        {
-            new MenuItem("Add", $"stage/add", "oi-plus", true),
+        SetMenu();
+        await Refresh();
+        await base.OnInitializedAsync();
+    }
+
+    private void RowClick(int id)
+    {
+        SelectedId = id;
+        SetMenu();
+    }
+
+    private void SetMenu()
+    {
+        MenuCollection = new MenuCollection
+{
+            new MenuButton("Add", OnAdd, "oi-plus", true),
+            new MenuButton("Edit", OnEdit, "oi-plus", SelectedId != null),
             new MenuDivider(),
-            new MenuItem("Delete", $"stage/delete", "oi-circle-x", true),
+            new MenuButton("Delete", OnDelete, "oi-circle-x", SelectedId != null),
+            new MenuButton("Refresh", Refresh, "oi-reload", true),
         };
-
-        base.OnParametersSet();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task Refresh()
     {
-        if (firstRender)
-        {
-            Records = await _store.Client.Stage.List();
-            StateHasChanged();
-        }
+        Records = (await _store.Client.Stage.List()).OrderBy(x => x.Stage).ToArray();
+        SelectedId = null;
+        SetMenu();
 
-        await base.OnAfterRenderAsync(firstRender);
+        StateHasChanged();
     }
 
+    private Task OnAdd()
+    {
+        SelectedId = null;
+        EditPanel.Open();
+        return Task.CompletedTask;
+    }
 
+    private Task OnEdit()
+    {
+        EditPanel.Open();
+        return Task.CompletedTask;
+    }
+
+    private Task OnDelete()
+    {
+        DeletePanel.Open();
+        return Task.CompletedTask;
+    }
+
+    private async Task Delete()
+    {
+        DeletePanel.Close();
+
+        if (SelectedId == null) return;
+
+        StageRecord? record = Records.Where(x => x.StageId == (int)SelectedId).FirstOrDefault();
+        if (record == null) return;
+
+        await _store.Client.Provider.Delete(record.Stage);
+        await Refresh();
+    }
 }

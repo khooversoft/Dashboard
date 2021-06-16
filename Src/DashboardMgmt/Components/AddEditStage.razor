@@ -1,0 +1,64 @@
+﻿@using DashboardMgmt.Model;
+@using DashboardMgmt.Services;
+@using DashboardMgmt.Application;
+
+@inject EngagementStore _store;
+
+<RightPanelForm @ref=@RightPanelForm TItem="StageModel" Model="Model" IsNew="IsNew" ObjectType="Stage" OnSet="CreateOrUpdate">
+    <FormBody>
+
+        <div class="form-group">
+            <label>Stage <RequiredSymbol /></label>
+            <InputText Id=@Constants.StartFocusId class="form-control" DisplayName="Stage's name" @bind-Value="Model.Stage" disabled=@IsDisabled />
+            <ValidationMessage For=@(() => Model.Stage) />
+        </div>
+
+        <div class="form-group">
+            <label>Order number</label>
+            <InputNumber class="form-control" DisplayName="Order number" @bind-Value="Model.OrderNumber" />
+            <ValidationMessage For=@(() => Model.OrderNumber) />
+        </div>
+    </FormBody>
+
+</RightPanelForm>
+
+
+@code {
+    [Parameter]
+    public int? StageId { get; set; }
+
+    [Parameter]
+    public Func<Task> Callback { get; set; } = null!;
+
+    private RightPanelForm<StageModel> RightPanelForm { get; set; } = null!;
+    private StageModel Model { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (StageId != null)
+        {
+            StageModel? record = (await _store.Client.Stage.List(stageId: (int)StageId)).FirstOrDefault()?.ConvertTo();
+            if (record != null)
+            {
+                Model.Stage = record.Stage;
+                Model.OrderNumber = record.OrderNumber;
+            }
+        }
+        else
+        {
+            Model.Stage = string.Empty;
+            Model.OrderNumber = 0;
+        }
+    }
+
+    private bool IsNew => StageId == null;
+    private bool IsDisabled => !IsNew;
+
+    public void Open() => RightPanelForm.Open();
+
+    private async Task CreateOrUpdate()
+    {
+        await _store.Client.Stage.Set(Model.Stage, Model.OrderNumber);
+        await Callback();
+    }
+}

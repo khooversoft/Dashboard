@@ -1,0 +1,72 @@
+﻿@using DashboardMgmt.Model;
+@using DashboardMgmt.Services;
+@using DashboardMgmt.Application;
+
+@typeparam TItem
+
+@inject IJSRuntime _js;
+
+@inject EngagementStore _store;
+
+<RightPanel @ref="RightPanel" WidthLevel="3">
+    <Title>@Title</Title>
+    <Body>
+
+        <EditForm EditContext="@EditContext">
+            <DataAnnotationsValidator />
+
+            @FormBody
+        </EditForm>
+
+    </Body>
+    <Footer>
+        <NavLink @onclick="CreateOrUpdate" class="btn alert-success">@CreateOrUpdateText</NavLink>
+        <NavLink @onclick="() => RightPanel.Close()" class="btn btn-light">Cancel</NavLink>
+    </Footer>
+</RightPanel>
+
+
+@code {
+    [Parameter]
+    public RenderFragment FormBody { get; set; } = null!;
+
+    [Parameter]
+    public TItem Model { get; set; } = default!;
+
+    [Parameter]
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public string ObjectType { get; set; } = null!;
+
+    [Parameter]
+    public Func<Task> OnSet { get; set; } = null!;
+
+    private RightPanel RightPanel { get; set; } = null!;
+    private EditContext EditContext { get; set; } = null!;
+
+    protected override void OnParametersSet()
+    {
+        EditContext = new EditContext(Model);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await _js.InvokeVoidAsync("focusInputOnId", Constants.StartFocusId);
+    }
+
+    private string CreateOrUpdateText => IsNew ? "Create" : "Save";
+    private string Title => (IsNew ? "Create" : "Edit") + " " + ObjectType;
+
+    public void Open() => RightPanel.Open();
+    public void Close() => RightPanel.Close();
+
+    private async Task CreateOrUpdate()
+    {
+        bool validationState = EditContext.Validate();
+        if (!validationState) return;
+
+        Close();
+        await OnSet();
+    }
+}
