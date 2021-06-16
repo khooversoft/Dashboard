@@ -8,7 +8,6 @@ namespace DashboardMgmt.Application
     public static class Constants
     {
         public const string StartFocusId = "start-focus";
-        public const string ExistFocusId = "exist-focus";
 
         public static class Pages
         {

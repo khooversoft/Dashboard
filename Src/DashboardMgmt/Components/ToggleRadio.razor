@@ -1,0 +1,21 @@
+﻿<ToggleButtonSwitch @bind-Value="ButtonIndex" Buttons="SwitchButtons" />
+
+@code {
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    private int ButtonIndex
+    {
+        get => Value ? 1 : 0;
+        set
+        {
+            Value = value switch { 0 => false, _ => true };
+            ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private static IReadOnlyList<string> SwitchButtons => new[] { "No", "Yes" };
+}
