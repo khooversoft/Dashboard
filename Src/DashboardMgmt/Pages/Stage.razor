@@ -65,13 +65,13 @@
             new MenuButton("Edit", OnEdit, "oi-plus", SelectedId != null),
             new MenuDivider(),
             new MenuButton("Delete", OnDelete, "oi-circle-x", SelectedId != null),
-            new MenuButton("Refresh", Refresh, "oi-reload", true),
+            new MenuButton("Refresh", () => Refresh(true), "oi-reload", true),
         };
     }
 
-    private async Task Refresh()
+    private async Task Refresh(bool noCache = false)
     {
-        Records = (await _store.Client.Stage.List()).OrderBy(x => x.Stage).ToArray();
+        Records = (await _store.Client.Stage.List(noCache: noCache)).OrderBy(x => x.Stage).ToArray();
         SelectedId = null;
         SetMenu();
 

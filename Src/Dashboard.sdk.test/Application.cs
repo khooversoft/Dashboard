@@ -37,7 +37,14 @@ namespace Dashboard.sdk.test
             });
         }
 
-        public static DashboardMgmtClient GetClient() => _client ?? new DashboardMgmtClient(GetConnectionString(), GetLoggerFactory().CreateLogger<DashboardMgmtClient>());
+        public static DashboardMgmtClient GetClient() => _client ?? new DashboardMgmtClient(
+            new DashboardMgmtClientConfig
+            {
+                ConnectionString = GetConnectionString(),
+                EnableCache = false
+            },
+            GetLoggerFactory().CreateLogger<DashboardMgmtClient>()
+        );
 
         public static async Task ClearDatabase()
         {
