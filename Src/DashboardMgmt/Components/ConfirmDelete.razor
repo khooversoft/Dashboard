@@ -33,9 +33,12 @@
 
     private RightPanel RightPanel { get; set; } = null!;
 
-    private async Task Delete() => await DeleteAction();
-
     public void Open() => RightPanel.Open();
-
     public void Close() => RightPanel.Close();
+
+    private async Task Delete()
+    {
+        Close();
+        await DeleteAction();
+    }
 }

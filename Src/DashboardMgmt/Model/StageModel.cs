@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dashboard.sdk.Records;
+using Toolbox.Tools;
 
 namespace DashboardMgmt.Model
 {
@@ -19,15 +20,23 @@ namespace DashboardMgmt.Model
 
     public static class StageModelExtensions
     {
-        public static StageModel? ConvertTo(this StageRecord? subject)
+        public static StageModel ConvertTo(this StageRecord subject)
         {
-            if (subject == null) return null;
+            subject.VerifyNotNull(nameof(subject));
 
             return new StageModel
             {
                 Stage = subject.Stage,
                 OrderNumber = subject.OrderNumber,
             };
+        }
+
+        public static void Reset(this StageModel subject)
+        {
+            subject.VerifyNotNull(nameof(subject));
+
+            subject.Stage = string.Empty;
+            subject.OrderNumber = 0;
         }
     }
 }

@@ -35,6 +35,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        Model.Reset();
+
         if (StageId != null)
         {
             StageModel? record = (await _store.Client.Stage.List(stageId: (int)StageId)).FirstOrDefault()?.ConvertTo();
@@ -43,11 +45,6 @@
                 Model.Stage = record.Stage;
                 Model.OrderNumber = record.OrderNumber;
             }
-        }
-        else
-        {
-            Model.Stage = string.Empty;
-            Model.OrderNumber = 0;
         }
     }
 

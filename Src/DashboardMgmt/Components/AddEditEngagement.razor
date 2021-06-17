@@ -1,114 +1,91 @@
-﻿@using DashboardMgmt.Application.Menu;
-@using DashboardMgmt.Model;
+﻿@using DashboardMgmt.Model;
 @using DashboardMgmt.Services;
-@using Dashboard.sdk.Records;
-@using System.ComponentModel.DataAnnotations;
+@using DashboardMgmt.Application;
 
 
 @inject EngagementStore _store;
 
-<RightPanel @ref="RightPanel" WidthLevel="2">
-    <Title>@Title</Title>
-    <Body>
+<RightPanelForm @ref=@RightPanelForm TItem="StageHistoryModel" Model="Model" IsNew="IsNew" ObjectType="Stage" OnSet="CreateOrUpdate">
+    <FormBody>
 
-        <EditForm EditContext="@EditContext">
-            <DataAnnotationsValidator />
+        <div class="form-group">
+            <label>Provider <RequiredSymbol /></label>
+            <InputSelect Id=@Constants.StartFocusId @bind-Value="Model.Provider" class="form-control" disabled=@IsDisabled>
+                @foreach (var item in Providers)
+                {
+                    <option>@item.Provider</option>
+                }
+            </InputSelect>
+            <ValidationMessage For=@(() => Model.Provider) />
+        </div>
 
-            <div class="form-group">
-                <label>Provider <RequiredSymbol /></label>
-                <InputText class="@FormControllClass(!Create)" DisplayName="Provider's name" @bind-Value="StageModel.Provider" />
-                <ValidationMessage For=@(() => StageModel.Provider) />
-            </div>
+        <div class="form-group">
+            <label>Stage <RequiredSymbol /></label>
+            <InputSelect @bind-Value="Model.Stage" class="form-control" disabled=@IsDisabled>
+                @foreach (var item in Stages)
+                {
+                    <option>@item.Stage</option>
+                }
+            </InputSelect>
+            <ValidationMessage For=@(() => Model.Stage) />
+        </div>
 
-            <div class="form-group">
-                <label>Stage</label>
-                <InputText class="@FormControllClass(!Create)" DisplayName="Stage" @bind-Value="StageModel.Stage" />
-                <ValidationMessage For=@(() => StageModel.Stage) />
-            </div>
+        <div class="form-group">
+            <label>Start Date</label>
+            <InputDate class="form-control" DisplayName="Stage" @bind-Value="Model.StartDate" />
+        </div>
 
-            <div class="form-group">
-                <label>Start Date</label>
-                <InputDate class="@FormControllClass(false)" DisplayName="Stage" @bind-Value="StageModel.StartDate" />
-            </div>
+        <div class="form-group">
+            <label>Completed Date</label>
+            <InputDate class="form-control" DisplayName="Stage" @bind-Value="Model.CompletedDate" />
+        </div>
 
-            <div class="form-group">
-                <label>Completed Date</label>
-                <InputDate class="@FormControllClass(false)" DisplayName="Stage" @bind-Value="StageModel.CompletedDate" />
-            </div>
+    </FormBody>
+</RightPanelForm>
 
-        </EditForm>
-
-    </Body>
-    <Footer>
-        <NavLink @onclick="CreateOrUpdate" class="@ButtonClass">@CreateOrUpdateText</NavLink>
-        <NavLink @onclick="() => RightPanel.Close()" class="btn btn-light">Cancel</NavLink>
-    </Footer>
-</RightPanel>
 
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
     [Parameter]
     public Func<Task> Callback { get; set; } = null!;
 
-    private StageHistoryModel StageModel { get; set; } = new();
+    private RightPanelForm<StageHistoryModel> RightPanelForm { get; set; } = null!;
+    private StageHistoryModel Model { get; set; } = new();
 
-    private RightPanel RightPanel { get; set; } = null!;
+    private bool IsNew => Id == null;
+    private bool IsDisabled => !IsNew;
 
-    private bool Create { get; set; } = false;
-
-    private EditContext EditContext { get; set; } = null!;
-
-    private Dictionary<string, string> ProviderErrorMsg { get; set; } = new Dictionary<string, string>(new[] { new KeyValuePair<string, string>("Provider", string.Empty) });
-
-    private bool ReadyToSet { get; set; } = false;
-
-    protected override void OnInitialized()
-    {
-        EditContext = new EditContext(StageModel);
-        base.OnInitialized();
-    }
+    private IReadOnlyList<ProviderModel> Providers { get; set; } = Array.Empty<ProviderModel>();
+    private IReadOnlyList<StageModel> Stages { get; set; } = Array.Empty<StageModel>();
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Id >= 0)
+        Providers = (await _store.Client.Provider.List()).Select(x => x.ConvertTo()).ToList();
+        Stages = (await _store.Client.Stage.List()).Select(x => x.ConvertTo()).ToList();
+
+        Model.Reset();
+
+        if (Id != null)
         {
             StageHistoryModel? record = (await _store.Client.StageHistory.List(stageHistoryId: Id)).FirstOrDefault()?.ConvertTo();
+            if (record != null)
+            {
+                Model.Provider = record.Provider;
+                Model.Stage = record.Stage;
+                Model.StartDate = record.StartDate;
+                Model.CompletedDate = record.CompletedDate;
+            }
         }
-
-        //Create = record == null;
-        //StageModel = record ?? new();
-
-        await base.OnParametersSetAsync();
     }
 
-    private string CreateOrUpdateText => Create ? "Create" : "Save";
-    private string Title => (Create ? "Create" : "Update") + " Engagement";
-    private string FormControllClass(bool disable) => "form-control" + (disable ? " disabled" : string.Empty);
-    private string ButtonClass => "btn " + (Create ? "alert-success" : "alert-danger");
-
-    public void Open() => RightPanel.Open();
-    public void Close() => RightPanel.Close();
-
-    private Task OnCancel()
-    {
-        Close();
-        return Task.CompletedTask;
-    }
+    public void Open() => RightPanelForm.Open();
 
     private async Task CreateOrUpdate()
     {
-        bool validationState = EditContext.Validate();
-        if (!validationState) return;
-
-        //var results = EditContext.GetValidationMessages();
-        //await InvokeAsync(() => StateHasChanged());
-
-
-        //await _store.Client.StageHistory.Set(Model.Provider, Model.Stage, Model.StartDate, Model.CompletedDate);
-        //Close();
-        //await Callback();
+        await _store.Client.StageHistory.Set(Model.Provider, Model.Stage, Model.StartDate, Model.CompletedDate);
+        await Callback();
     }
 }

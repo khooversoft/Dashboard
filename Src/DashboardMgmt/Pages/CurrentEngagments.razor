@@ -7,9 +7,9 @@
 
 @inject EngagementStore _store;
 
-<ConfirmDelete @ref="DeletePanel" Title="Delete Engagement" ObjectName="Engagement" DeleteId="@(SelectedId?.ToString() ?? "**")" DeleteAction="async () => await Delete()"/>
+<ConfirmDelete @ref="DeletePanel" Title="Delete Engagement" ObjectName="Engagement" DeleteName=@GetDeleteName() DeleteAction="async () => await Delete()"/>
 
-<AddEditEngagement @ref="EditPanel" Callback="async () => await Refresh()" Id=@EditId/>
+<AddEditEngagement @ref="EditPanel" Callback="async () => await Refresh()" Id=@SelectedId />
 
 <PageHeader Header="Engagement" SubHeader="Current" />
 
@@ -45,16 +45,12 @@
 
 @code {
     private MenuCollection MenuCollection { get; set; } = null!;
-
     private IReadOnlyList<StageHistoryRecord> Records { get; set; } = new List<StageHistoryRecord>();
-
     private int? SelectedId { get; set; } = null;
-
-    private int EditId { get; set; }
-
     private AddEditEngagement EditPanel { get; set; } = null!;
-
     private ConfirmDelete DeletePanel { get; set; } = null!;
+
+    private string GetDeleteName() => Records.Where(x => x.StageHistoryId == SelectedId).FirstOrDefault()?.FriendlyName()?? string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,7 +70,7 @@
         MenuCollection = new MenuCollection
 {
             new MenuButton("Add", OnAdd, "oi-plus", true),
-            new MenuButton("Edit", OnEdit, "oi-plus", true),
+            new MenuButton("Edit", OnEdit, "oi-plus", SelectedId != null),
             new MenuDivider(),
             new MenuButton("Delete", OnDelete, "oi-circle-x", SelectedId != null),
             new MenuButton("Refresh", Refresh, "oi-reload", true),
@@ -92,14 +88,13 @@
 
     private Task OnAdd()
     {
-        EditId = -1;
+        SelectedId = null;
         EditPanel.Open();
         return Task.CompletedTask;
     }
 
     private Task OnEdit()
     {
-        EditId = (int)SelectedId!;
         EditPanel.Open();
         return Task.CompletedTask;
     }
@@ -112,15 +107,12 @@
 
     private async Task Delete()
     {
-        DeletePanel.Close();
-
         if (SelectedId == null) return;
 
         StageHistoryRecord? record = Records.Where(x => x.StageHistoryId == (int)SelectedId).FirstOrDefault();
         if (record == null) return;
 
-        //await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
+        await _store.Client.StageHistory.Delete(record.Provider, record.Stage);
         await Refresh();
     }
-
 }

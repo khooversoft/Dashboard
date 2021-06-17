@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Data.SqlClient;
 using Toolbox.Sql.Extensions;
+using Toolbox.Tools;
 
 namespace Dashboard.sdk.Records
 {
@@ -32,6 +33,16 @@ namespace Dashboard.sdk.Records
                 StartDate = reader.Get<DateTime?>(nameof(StartDate)),
                 CompletedDate = reader.Get<DateTime?>(nameof(CompletedDate)),
             };
+        }
+    }
+
+    public static class StageHistoryRecordExtensions
+    {
+        public static string FriendlyName(this StageHistoryRecord subject)
+        {
+            subject.VerifyNotNull(nameof(subject));
+
+            return subject.Provider + " - " + subject.Stage;
         }
     }
 }

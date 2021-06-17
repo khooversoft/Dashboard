@@ -99,8 +99,6 @@
 
     private async Task Delete()
     {
-        DeletePanel.Close();
-
         if (SelectedId == null) return;
 
         StageRecord? record = Records.Where(x => x.StageId == (int)SelectedId).FirstOrDefault();

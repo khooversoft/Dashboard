@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dashboard.sdk.Records;
+using Toolbox.Tools;
 
 namespace DashboardMgmt.Model
 {
@@ -18,15 +19,23 @@ namespace DashboardMgmt.Model
 
     public static class ProviderModelExtensions
     {
-        public static ProviderModel? ConvertTo(this ProviderRecord? subject)
+        public static ProviderModel ConvertTo(this ProviderRecord subject)
         {
-            if (subject == null) return null;
+            subject.VerifyNotNull(nameof(subject));
 
             return new ProviderModel
             {
                 Provider = subject.Provider,
                 Show = subject.Show,
             };
+        }
+
+        public static void Reset(this ProviderModel subject)
+        {
+            subject.VerifyNotNull(nameof(subject));
+
+            subject.Provider = string.Empty;
+            subject.Show = true;
         }
     }
 }

@@ -40,13 +40,9 @@
 
 @code {
     private MenuCollection MenuCollection { get; set; } = null!;
-
     private IReadOnlyList<ProviderRecord> Records { get; set; } = new List<ProviderRecord>();
-
     private int? SelectedId { get; set; } = null;
-
     private AddEditProvider EditPanel { get; set; } = null!;
-
     private ConfirmDelete DeletePanel { get; set; } = null!;
 
     private string GetDeleteName() => Records.Where(x => x.ProviderId == SelectedId).FirstOrDefault()?.Provider ?? string.Empty;
@@ -106,8 +102,6 @@
 
     private async Task Delete()
     {
-        DeletePanel.Close();
-
         if (SelectedId == null) return;
 
         ProviderRecord? record = Records.Where(x => x.ProviderId == (int)SelectedId).FirstOrDefault();
